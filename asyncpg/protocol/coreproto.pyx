@@ -78,6 +78,7 @@ cdef class CoreProtocol:
                     self._process__auth(mtype)
 
                 elif state == PROTOCOL_PREPARE:
+                    print("inside PROTOCOL_PREPARE")
                     self._process__prepare(mtype)
 
                 elif state == PROTOCOL_BIND_EXECUTE:
@@ -232,6 +233,12 @@ cdef class CoreProtocol:
             # NoData
             self.buffer.discard_message()
             self._push_result()
+
+        elif mtype == b'Z':
+            # ReadyForQuery
+            self._parse_msg_ready_for_query()
+            self._push_result()
+            
 
     cdef _process__bind_execute(self, char mtype):
         if mtype == b'D':
@@ -986,6 +993,7 @@ cdef class CoreProtocol:
         buf.end_message()
         packet.write_buffer(buf)
 
+        packet.write_bytes(SYNC_MESSAGE)
         packet.write_bytes(FLUSH_MESSAGE)
 
         self._write(packet)
